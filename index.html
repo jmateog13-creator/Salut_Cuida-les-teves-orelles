@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuida les teves orelles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #a8e0ff 0%, #d4f1f4 100%);
+            touch-action: manipulation; /* Improves touch responsiveness */
+        }
+        .health-bar-gradient {
+            background-image: linear-gradient(to right, #ef4444, #f59e0b, #84cc16);
+        }
+        .speech-bubble {
+            position: relative;
+            background: #ffffff;
+            border-radius: .4em;
+            padding: 1.5rem;
+            border: 2px solid #cbd5e1;
+        }
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #ffffff;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -10px;
+            margin-bottom: -20px;
+        }
+        /* Style for the feedback popup */
+        #feedback-popup {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        /* Sims Plumbob animation */
+        @keyframes float {
+            0% { transform: translatey(0px) rotate(45deg); }
+            50% { transform: translatey(-10px) rotate(45deg); }
+            100% { transform: translatey(0px) rotate(45deg); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+            transform-origin: center;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="game-container" class="w-full max-w-2xl mx-auto bg-slate-50/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 space-y-6 border border-white/50">
+        
+        <!-- Header -->
+        <header class="text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Cuida les teves orelles</h1>
+            <p class="text-slate-500">L'Aventura Auditiva</p>
+            <div id="decision-counter" class="mt-2 text-sm font-semibold text-slate-600"></div>
+        </header>
+
+        <!-- Health Bar Section -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-semibold text-slate-600">Salut Auditiva</span>
+                <span id="health-percentage" class="text-sm font-bold text-slate-700">100%</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-6 overflow-hidden border border-slate-300">
+                <div id="health-bar" class="health-bar-gradient h-full rounded-full transition-all duration-500 ease-in-out" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Character and Situation Section -->
+        <main class="text-center space-y-6">
+            <div class="relative inline-block mt-8">
+                <!-- The Sims Plumbob -->
+                <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-12 h-12 z-10">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-full h-full float-animation">
+                         <polygon points="50,0 90,25 90,75 50,100 10,75 10,25" fill="#4ade80" stroke="#166534" stroke-width="5"/>
+                    </svg>
+                </div>
+                 <!-- Character SVG -->
+                <svg class="w-32 h-32 md:w-40 md:h-40 text-slate-700" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0ZM50 10C72.0914 10 90 27.9086 90 50C90 72.0914 72.0914 90 50 90C27.9086 90 10 72.0914 10 50C10 27.9086 27.9086 10 50 10Z" fill="#e2e8f0"/>
+                    <path d="M50 75C61.0457 75 70 66.0457 70 55C70 43.9543 61.0457 35 50 35C38.9543 35 30 43.9543 30 55C30 66.0457 38.9543 75 50 75Z" fill="#475569"/>
+                    <path d="M50 42C48.3431 42 47 40.6569 47 39C47 34.0294 50.5817 30 55 30C59.4183 30 63 34.0294 63 39C63 40.6569 61.6569 42 60 42C58.3431 42 57 40.6569 57 39C57 36.2386 54.7614 34 52 34C49.2386 34 47 36.2386 47 39C47 40.6569 48.3431 42 50 42Z" fill="#f1f5f9"/>
+                    <circle cx="38" cy="53" r="3" fill="#f1f5f9"/>
+                    <circle cx="62" cy="53" r="3" fill="#f1f5f9"/>
+                    <path d="M45 65C45 62.2386 47.2386 60 50 60C52.7614 60 55 62.2386 55 65H45Z" fill="#f1f5f9"/>
+                </svg>
+            </div>
+            
+            <div id="situation-box" class="speech-bubble">
+                <p id="situation-text" class="text-slate-800 text-lg md:text-xl min-h-[6rem] flex items-center justify-center">Carregant situació...</p>
+            </div>
+        </main>
+
+        <!-- Choices Section -->
+        <footer id="choices-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button id="choice-a" class="w-full bg-cyan-500 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-cyan-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2"></button>
+            <button id="choice-b" class="w-full bg-lime-500 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:bg-lime-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:ring-offset-2"></button>
+        </footer>
+    </div>
+
+    <!-- Feedback Popup -->
+    <div id="feedback-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transform scale-95">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center space-y-4">
+            <p id="feedback-text" class="text-lg text-slate-700"></p>
+            <button id="next-button" class="bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-600 transition-colors">Següent</button>
+        </div>
+    </div>
+    
+    <!-- End Game Modal -->
+    <div id="end-game-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center space-y-4">
+            <h2 id="end-game-title" class="text-2xl font-bold text-slate-800"></h2>
+            <div id="end-game-summary" class="py-4">
+                <!-- El resum del percentatge es generarà aquí -->
+            </div>
+            <p id="end-game-message" class="text-slate-600"></p>
+            <button id="restart-button" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition-colors">Tornar a Jugar</button>
+        </div>
+    </div>
+
+    <script>
+        const situations = [
+            // Matí
+            {
+                text: "T'has dutxat i t'eixugues el cabell amb l'assecador.",
+                choices: [
+                    { text: "El poso a la màxima potència per acabar ràpid.", feedback: "Un assecador a màxima potència pot ser sorprenentment sorollós i perjudicial.", penalty: 10 },
+                    { text: "Utilitzo una potència més baixa encara que trigui una mica més.", feedback: "Bé! Menys soroll, tot i que encara és una font de so propera.", penalty: 1 }
+                ]
+            },
+            {
+                text: "Estàs anant a l'institut amb l'autobús. Què fas amb els teus auriculars?",
+                choices: [
+                    { text: "Pujo el volum al màxim per no sentir el soroll del motor.", feedback: "Compte! Un volum massa alt pot danyar les teves orelles a la llarga.", penalty: 10 },
+                    { text: "Ajusto el volum a un nivell moderat per gaudir de la música.", feedback: "Perfecte! Protegeixes les teves orelles i gaudeixes de la música de forma segura.", penalty: 0 }
+                ]
+            },
+            {
+                text: "Vols escoltar música mentre camines pel carrer cap a l'institut.",
+                choices: [
+                    { text: "Només amb un auricular, però amb el volum el doble de fort.", feedback: "Concentrar tot el volum en una sola orella és molt perjudicial.", penalty: 10 },
+                    { text: "Amb els dos auriculars a un volum baix que em permeti estar atent.", feedback: "Així protegeixes les orelles i, a més, estàs atent al trànsit. Doble victòria!", penalty: 0 }
+                ]
+            },
+            // A l'institut
+            {
+                text: "El timbre de l'institut sona just al teu costat.",
+                choices: [
+                    { text: "No hi faig res, és el que hi ha.", feedback: "Els sons forts i sobtats també poden afectar, encara que siguin curts.", penalty: 10 },
+                    { text: "Em tapo les orelles un moment si em pilla desprevingut.", feedback: "És un gest ràpid i eficaç per protegir-te d'un pic de so molt alt.", penalty: 0 }
+                ]
+            },
+            {
+                text: "Estàs fent un treball en grup a l'hora del pati. On aneu?",
+                choices: [
+                    { text: "A una cafeteria sorollosa, que hi ha més ambient.", feedback: "En un lloc sorollós haureu de forçar la veu i l'oïda per entendre-us.", penalty: 10 },
+                    { text: "A la biblioteca, on podem parlar en veu baixa i concentrar-nos.", feedback: "És el millor lloc per comunicar-se sense forçar i protegir la vostra audició.", penalty: 0 }
+                ]
+            },
+            // Tarda
+            {
+                text: "El teu amic et porta de tornada a casa amb el seu ciclomotor que fa molt soroll.",
+                choices: [
+                    { text: "Cap problema, és un moment i aguanto el soroll.", feedback: "El soroll del motor i del vent pot ser molt perjudicial, fins i tot en trajectes curts.", penalty: 10 },
+                    { text: "Em poso el casc ben cordat, que també protegeix del soroll.", feedback: "Correcte! El casc redueix molt el soroll, però el del motor segueix sent intens.", penalty: 2 }
+                ]
+            },
+            {
+                text: "Estàs estudiant per un examen i els teus veïns fan obres.",
+                choices: [
+                    { text: "Poso música amb auriculars a tot volum per tapar el soroll.", feedback: "Tapar un soroll fort amb un altre de més fort encara és doblement perjudicial.", penalty: 10 },
+                    { text: "Utilitzo taps o auriculars amb cancel·lació de soroll sense música.", feedback: "Excel·lent! Redueixes el soroll ambient sense afegir volum perjudicial.", penalty: 0 }
+                ]
+            },
+            {
+                text: "Ajudes a casa a passar l'aspiradora, que fa un soroll terrible.",
+                choices: [
+                    { text: "Ho faig ràpid i corrents per acabar abans amb el soroll.", feedback: "La rapidesa no redueix l'impacte del so a les teves orelles.", penalty: 10 },
+                    { text: "Utilitzo protecció auditiva (taps o auriculars) si em molesta.", feedback: "Perfecte! Protegir-se del soroll dels electrodomèstics també és important.", penalty: 1 }
+                ]
+            },
+            {
+                text: "Estàs jugant al teu videojoc preferit amb auriculars.",
+                choices: [
+                    { text: "A tot volum per sentir tots els detalls i explosions.", feedback: "Els pics de so en els videojocs poden ser molt alts i perillosos a volum màxim.", penalty: 10 },
+                    { text: "A un volum que em permeti sentir el joc sense que em faci mal el cap.", feedback: "Jugar de forma segura et permetrà gaudir-ne durant molts més anys.", penalty: 0 }
+                ]
+            },
+            {
+                text: "El teu mòbil et notifica que el volum pot ser perjudicial.",
+                choices: [
+                    { text: "Ignoro l'avís i apujo el volum igualment.", feedback: "Aquests avisos hi són per una raó. És important fer-los cas.", penalty: 10 },
+                    { text: "Faig cas de l'avís i mantinc el volum en la zona segura.", feedback: "Molt bé. La tecnologia pot ser una gran aliada per cuidar-nos.", penalty: 0 }
+                ]
+            },
+            // Temps lliure / Cap de setmana
+             {
+                text: "Vas al cinema a veure una pel·lícula d'acció.",
+                choices: [
+                    { text: "Trio el seient del mig, just on el so és més potent.", feedback: "A les pel·lícules d'acció el so pot ser molt intens. Compte amb l'exposició prolongada.", penalty: 10 },
+                    { text: "Considero portar taps que redueixen el volum sin perdre qualitat.", feedback: "És una opció genial, tot i que el nivell de so general al cinema segueix sent alt.", penalty: 1 }
+                ]
+            },
+            {
+                text: "Estàs a una festa i la música està molt alta.",
+                choices: [
+                    { text: "M'hi quedo tota la nit, ja m'acostumaré al soroll.", feedback: "Encara que t'hi 'acostumis', el dany a les orelles es continua produint.", penalty: 10 },
+                    { text: "Surto a fora de tant en tant per donar un descans a les meves orelles.", feedback: "Molt intel·ligent! Fer descansos auditius és clau, encara que segueixis exposat al soroll.", penalty: 1 }
+                ]
+            },
+            {
+                text: "Aquest cap de setmana vas a un concert. On et poses?",
+                choices: [
+                    { text: "Just davant dels altaveus per sentir-ho tot bé.", feedback: "Aquesta zona té nivells de so perillosos. És millor estar una mica més lluny.", penalty: 10 },
+                    { text: "A una distància prudent, on el so sigui clar però no eixordador.", feedback: "Bona decisió! Tot i així, el nivell de so en un concert és molt elevat.", penalty: 2 }
+                ]
+            },
+            {
+                text: "Després del concert, sents un xiulet a les orelles (acúfens).",
+                choices: [
+                    { text: "No hi dono importància i poso música per no sentir-lo.", feedback: "Ignorar-ho i afegir més soroll pot empitjorar la situació.", penalty: 10 },
+                    { text: "Busco un lloc tranquil per deixar que les orelles es recuperin.", feedback: "És el millor que pots fer. És un senyal que les teves orelles han patit.", penalty: 0 }
+                ]
+            },
+            {
+                text: "És la Festa Major i hi ha un correfoc amb petards molt forts.",
+                choices: [
+                    { text: "Em poso a primera fila per veure-ho tot de prop.", feedback: "Les explosions dels petards tan a prop poden causar danys auditius permanents.", penalty: 10 },
+                    { text: "Ho miro des d'una distància segura per gaudir de l'espectacle.", feedback: "Molt bé! La distància ajuda, però els petards segueixen sent extremadament sorollosos.", penalty: 1 }
+                ]
+            }
+        ];
+
+        // Game state
+        let currentSituationIndex = 0;
+        let auditoryHealth = 100;
+        
+        // DOM Elements
+        const healthBar = document.getElementById('health-bar');
+        const healthPercentage = document.getElementById('health-percentage');
+        const situationText = document.getElementById('situation-text');
+        const choiceAButton = document.getElementById('choice-a');
+        const choiceBButton = document.getElementById('choice-b');
+        const choicesContainer = document.getElementById('choices-container');
+        const decisionCounter = document.getElementById('decision-counter');
+
+        const feedbackPopup = document.getElementById('feedback-popup');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextButton = document.getElementById('next-button');
+        
+        const endGameModal = document.getElementById('end-game-modal');
+        const endGameTitle = document.getElementById('end-game-title');
+        const endGameMessage = document.getElementById('end-game-message');
+        const restartButton = document.getElementById('restart-button');
+
+
+        function startGame() {
+            currentSituationIndex = 0;
+            auditoryHealth = 100;
+            updateHealthBar();
+            displaySituation();
+            endGameModal.classList.add('hidden');
+            choicesContainer.classList.remove('hidden');
+        }
+
+        function displaySituation() {
+            if (currentSituationIndex >= situations.length) {
+                endGame();
+                return;
+            }
+            decisionCounter.textContent = `Decisió ${currentSituationIndex + 1} de ${situations.length}`;
+
+            const situation = situations[currentSituationIndex];
+            situationText.textContent = situation.text;
+            
+            // Randomize button positions
+            const choices = [...situation.choices];
+            if (Math.random() > 0.5) {
+                [choices[0], choices[1]] = [choices[1], choices[0]];
+            }
+
+            choiceAButton.textContent = choices[0].text;
+            choiceAButton.choiceData = choices[0];
+
+            choiceBButton.textContent = choices[1].text;
+            choiceBButton.choiceData = choices[1];
+        }
+
+        function handleChoice(chosen) {
+            if (chosen.penalty && chosen.penalty > 0) {
+                 auditoryHealth = Math.max(0, auditoryHealth - chosen.penalty);
+            }
+            
+            updateHealthBar();
+            showFeedback(chosen.feedback);
+        }
+
+        function showFeedback(message) {
+            feedbackText.textContent = message;
+            feedbackPopup.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+            feedbackPopup.classList.add('opacity-100', 'scale-100');
+        }
+
+        function hideFeedback() {
+            feedbackPopup.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            feedbackPopup.classList.remove('opacity-100', 'scale-100');
+            
+            currentSituationIndex++;
+
+            if (auditoryHealth <= 0) {
+                endGame();
+            } else {
+                displaySituation();
+            }
+        }
+        
+        function updateHealthBar() {
+            const percentage = Math.round(auditoryHealth);
+            healthBar.style.width = `${percentage}%`;
+            healthPercentage.textContent = `${percentage}%`;
+        }
+
+        function endGame() {
+            choicesContainer.classList.add('hidden');
+            const finalHealth = Math.round(auditoryHealth);
+            const summaryContainer = document.getElementById('end-game-summary');
+            summaryContainer.innerHTML = ''; // Netejar resum anterior
+
+            // Crear nous elements per al resum
+            const healthDisplay = document.createElement('p');
+            healthDisplay.className = 'text-5xl font-bold mb-2';
+            healthDisplay.textContent = `${finalHealth}%`;
+
+            const explanation = document.createElement('p');
+            explanation.className = 'text-sm text-slate-500';
+
+            // Aplicar colors i text segons la salut
+            if (finalHealth <= 49) {
+                healthDisplay.classList.add('text-red-500');
+                explanation.textContent = "La teva salut auditiva necessita atenció urgent.";
+            } else if (finalHealth <= 74) {
+                healthDisplay.classList.add('text-amber-500');
+                explanation.textContent = "Vas pel bon camí, però encara pots millorar.";
+            } else {
+                healthDisplay.classList.add('text-green-500');
+                explanation.textContent = "Excel·lent! Saps com cuidar les teves orelles.";
+            }
+
+            summaryContainer.appendChild(healthDisplay);
+            summaryContainer.appendChild(explanation);
+
+            let title, message;
+
+            if (auditoryHealth > 70) {
+                title = "Enhorabona, expert auditiu!";
+                message = "Has demostrat que saps cuidar molt bé de les teves orelles. Continua així!";
+            } else if (auditoryHealth > 30) {
+                title = "No està malament, però es pot millorar.";
+                message = "Has pres algunes bones decisions, però encara hi ha situacions de risc que has d'aprendre a gestionar.";
+            } else {
+                title = "Oh, oh! Compte amb les teves orelles!";
+                message = "La teva salut auditiva està en risc. És molt important que comencis a prendre millors decisions per protegir la teva audició.";
+            }
+
+            endGameTitle.textContent = title;
+            endGameMessage.textContent = message;
+            endGameModal.classList.remove('hidden');
+        }
+
+        choiceAButton.addEventListener('click', () => handleChoice(choiceAButton.choiceData));
+        choiceBButton.addEventListener('click', () => handleChoice(choiceBButton.choiceData));
+        nextButton.addEventListener('click', hideFeedback);
+        restartButton.addEventListener('click', startGame);
+
+        // Initial game start
+        startGame();
+    </script>
+</body>
+</html>
+
