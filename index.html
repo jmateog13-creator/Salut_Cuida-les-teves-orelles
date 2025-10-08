@@ -55,6 +55,16 @@
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Instructions Popup -->
+    <div id="instructions-popup" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center space-y-6 transform transition-transform duration-300 scale-95">
+            <h2 class="text-2xl font-bold text-slate-800">Instruccions del Joc</h2>
+            <p class="text-slate-600 text-lg">Has d'elegir les millors accions per a aconseguir el màxim de salut auditiva possible. Pensa-t'ho bé abans de cada elecció!</p>
+            <button id="start-game-button" class="w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2">Començar!</button>
+        </div>
+    </div>
+
     <div id="game-container" class="w-full max-w-2xl mx-auto bg-slate-50/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 space-y-6 border border-white/50">
         
         <!-- Header -->
@@ -81,7 +91,7 @@
                 <!-- The Sims Plumbob -->
                 <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-12 h-12 z-10">
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-full h-full float-animation">
-                         <polygon points="50,0 90,25 90,75 50,100 10,75 10,25" fill="#4ade80" stroke="#166534" stroke-width="5"/>
+                          <polygon points="50,0 90,25 90,75 50,100 10,75 10,25" fill="#4ade80" stroke="#166534" stroke-width="5"/>
                     </svg>
                 </div>
                  <!-- Character SVG -->
@@ -261,6 +271,9 @@
         const endGameTitle = document.getElementById('end-game-title');
         const endGameMessage = document.getElementById('end-game-message');
         const restartButton = document.getElementById('restart-button');
+        
+        const instructionsPopup = document.getElementById('instructions-popup');
+        const startGameButton = document.getElementById('start-game-button');
 
 
         function startGame() {
@@ -381,9 +394,26 @@
         nextButton.addEventListener('click', hideFeedback);
         restartButton.addEventListener('click', startGame);
 
-        // Initial game start
-        startGame();
+        // Show instructions popup on load
+        window.addEventListener('load', () => {
+            const popupContent = instructionsPopup.querySelector('div');
+            instructionsPopup.classList.remove('opacity-0');
+            popupContent.classList.remove('scale-95');
+            popupContent.classList.add('scale-100');
+        });
+
+        // Start game when the button in the popup is clicked
+        startGameButton.addEventListener('click', () => {
+            const popupContent = instructionsPopup.querySelector('div');
+            instructionsPopup.classList.add('opacity-0');
+            popupContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                instructionsPopup.classList.add('hidden');
+                startGame();
+            }, 300); // Wait for animation to finish
+        });
+
     </script>
 </body>
 </html>
-
